@@ -8,6 +8,8 @@ import (
 	"patungan-server/internal/models"
 	"patungan-server/internal/repository"
 	"patungan-server/internal/utils"
+
+	"github.com/google/uuid"
 )
 
 type AuthService interface {
@@ -28,9 +30,9 @@ func NewAuthService(userRepo repository.UserRepository, cfg *config.Config) Auth
 }
 
 func (s *authService) Register(req *request.RegisterRequest) (*response.AuthResponse, error) {
-	// Checj if user exists
+	// Check if user exists
 	existingUser, _ := s.userRepo.FindByEmail(req.Email)
-	if existingUser != nil {
+	if existingUser != nil && existingUser.ID != uuid.Nil {
 		return nil, errors.New("email already exists")
 	}
 

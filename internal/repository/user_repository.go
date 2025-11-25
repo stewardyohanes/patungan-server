@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"log"
 	"patungan-server/internal/models"
 
 	"github.com/google/uuid"
@@ -36,6 +37,8 @@ func (r *userRepository) FindByID(id uuid.UUID) (*models.User, error) {
 func (r *userRepository) FindByEmail(email string) (*models.User, error) {
 	var user models.User
 	err := r.db.First(&user, "email = ?", email).Error
+	log.Println("Error:", err)
+	log.Println("User:", user)
 	return &user, err
 }
 
