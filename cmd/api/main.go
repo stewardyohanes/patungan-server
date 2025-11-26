@@ -45,14 +45,21 @@ func main() {
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
 	billRepo := repository.NewBillRepository(db)
+	participantRepo := repository.NewParticipantRepository(db)
+	itemRepo := repository.NewItemRepository(db)
+	itemParticipantRepo := repository.NewItemParticipantRepository(db)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, cfg)
 	billService := service.NewBillService(billRepo)
+	participantService := service.NewParticipantService(participantRepo, billRepo, userRepo, itemRepo)
+	itemService := service.NewItemService(itemRepo, billRepo, itemParticipantRepo, participantService)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
 	billHandler := handler.NewBillHandler(billService)
+	participantHandler := handler.NewParticipantHandler(participantService)
+	itemHandler := handler.NewItemHandler(itemService)
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
@@ -102,6 +109,19 @@ func main() {
 	bills.Get("/:id", billHandler.GetByID)
 	bills.Put("/:id", billHandler.Update)
 	bills.Delete("/:id", billHandler.Delete)
+
+	// Participant routes (protected)
+	bills.Post("/:billId/participants", participantHandler.AddParticipants)
+	bills.Get("/:billId/participants", participantHandler.GetParticipants)
+	bills.Delete("/:billId/participants/:participantId", participantHandler.RemoveParticipant)
+	bills.Put("/participants/:participantId", participantHandler.UpdateParticipant)
+	bills.Post("/:billId/recalculate", participantHandler.RecalculateSplits)
+
+	// Item routes (protected)
+	bills.Post("/:billId/items", itemHandler.AddItems)
+	bills.Get("/:billId/items", itemHandler.GetItems)
+	bills.Put("/items/:itemId", itemHandler.UpdateItem)
+	bills.Delete("/items/:itemId", itemHandler.DeleteItem)
 
 	// Start server
 	log.Printf("Server starting on port %s (Environment: %s)", cfg.Server.Port, cfg.Server.Env)
