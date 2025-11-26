@@ -8,7 +8,7 @@ type CreateBillRequest struct {
 	TotalAmount  float64     `json:"total_amount" validate:"required,min=0"`
 	Currency     string      `json:"currency" validate:"required,len=3"`
 	SplitMethod  string      `json:"split_method" validate:"required,oneof=equal items custom"`
-	Participants []uuid.UUID `json:"participants" validate:"required,min=1"`
+	Participants []uuid.UUID `json:"participants"`
 }
 
 type UpdateBillRequest struct {
